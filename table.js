@@ -8,7 +8,7 @@ function cursor(cur) {
 	document.body.style.cursor = cur;
 }
 
-CanvasRenderingContext2D.prototype.line = function(x, y, sx, sy) {
+CanvasRenderingContext2D.prototype.line = function (x, y, sx, sy) {
 	this.beginPath();
 	this.moveTo(x, y);
 	this.lineTo(x + sx, y + sy);
@@ -25,6 +25,7 @@ class Cell {
 		
 		this.selected = false;
 		this.selected2 = false;
+		this.ctrl = false;
 	}
 	
 	get pos() {
@@ -93,9 +94,7 @@ class Table {
 		str = str.replace(/\$?([a-z]+)\$?([0-9]+):\$?([a-z]+)\$?([0-9]+)/gi, (match, c1, r1, c2, r2) => {
 			let tmp = "";
 			this.forEachCellIn(Table.asCol(c1), r1 - 1, Table.asCol(c2), r2 - 1, (cell2) => {
-				if (cell2.expr.includes(cell.name))
-					throw new TableException("Self referencing cell " + cell.name);
-				tmp += cell2.value + ",";
+				tmp += cell2.name + ",";
 			});
 			return tmp.substring(0, tmp.length - 1);
 		});
@@ -105,7 +104,7 @@ class Table {
 			let cell2 = this.cells[Table.asCol(c)][r - 1];
 			if (cell2.expr.includes(cell.name))
 				throw new TableException("Self referencing cell " + cell.name);
-			return cell2.value;
+			return (cell2.value === "" ? 0 : cell2.value);
 		});
 		
 		return str;
@@ -126,7 +125,7 @@ class Table {
 		
 		this.forEachCell((cell) => {
 			if (cell.selected) {
-				ctx.fillStyle = "#eee";
+				ctx.fillStyle = "#ddf";
 				selected.push(cell);
 			} else
 				ctx.fillStyle = "#fff";
@@ -190,18 +189,25 @@ class Table {
 	}
 	
 	update(mouse, key) {
+		if (key["Escape"]) {
+			this.selectionStart = null;
+			this.forEachCell(cell => cell.selected = cell.selected2 = false);
+		}
+		
 		if (mouse.click === 1 && !this.prevClick) {
 			this.selectionStart = this.cellAt(mouse.x, mouse.y);
 			
 			this.prevClick = true;
 		}
 		if (mouse.click === 1 && this.prevClick) {
-			let prop = (key["Control"] ? "selected2" : "selected");
-			this.forEachCell(cell => cell[prop] = false);
-			this.forEachCellIn(this.selectionStart, this.cellAt(mouse.x, mouse.y), (cell) => cell[prop] = true);
+			if (this.selectionStart != null) {
+				let prop = (key["Control"] ? "selected2" : "selected");
+				this.forEachCell(cell => cell[prop] = false);
+				this.forEachCellIn(this.selectionStart, this.cellAt(mouse.x, mouse.y), (cell) => cell[prop] = true);
+			}
 		}
 		if (mouse.click === 0 && this.prevClick) {
-			if (key["Control"])
+			if (key["Control"] && this.selectionStart != null)
 				this.forEachCellIn(this.selectionStart, this.cellAt(mouse.x, mouse.y), (cell) => {
 					cell.selected = !cell.selected;
 					cell.selected2 = false;
@@ -212,11 +218,10 @@ class Table {
 	}
 }
 
-Table.asCol = function(str) {
+Table.asCol = function (str) {
 	str = str.toUpperCase();
 	let val = 0;
-	for (let char of str) {
+	for (let char of str)
 		val = val * 26 + char.charCodeAt(0) - 64;
-	}
 	return val - 1;
 };

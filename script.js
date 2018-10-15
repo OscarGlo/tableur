@@ -14,7 +14,7 @@ window.addEventListener("load", () => {
 	canvas = document.getElementById("canvas");
 	
 	// Disable contextual menu on canvas
-	canvas.oncontextmenu = function(e) {
+	canvas.oncontextmenu = function (e) {
 		e.preventDefault();
 	};
 	
@@ -25,7 +25,7 @@ window.addEventListener("load", () => {
 	table = new Table(10, 30, 75, 25);
 	
 	// Add update and draw on events
-	["mousemove", "mouseup", "mousedown", "keyup", "keydown"].forEach(
+	["mousemove", "mouseup", "mousedown", "keyup", "keydown", "resize"].forEach(
 		evt => window.addEventListener(evt, () => {
 			table.update(mouse, key);
 			table.draw(canvas);
