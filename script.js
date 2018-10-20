@@ -3,7 +3,7 @@ let mouse = {
 	x: 0, y: 0,
 	click: 0
 };
-let key = [];
+let key = {};
 
 function fitCanvas() {
 	canvas.width = window.innerWidth;
@@ -14,9 +14,7 @@ window.addEventListener("load", () => {
 	canvas = document.getElementById("canvas");
 	
 	// Disable contextual menu on canvas
-	canvas.oncontextmenu = function (e) {
-		e.preventDefault();
-	};
+	canvas.oncontextmenu = (e) => e.preventDefault();
 	
 	// Fit canvas on window resize
 	fitCanvas();

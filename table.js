@@ -8,7 +8,7 @@ function cursor(cur) {
 	document.body.style.cursor = cur;
 }
 
-CanvasRenderingContext2D.prototype.line = function (x, y, sx, sy) {
+CanvasRenderingContext2D.prototype.line = function(x, y, sx, sy) {
 	this.beginPath();
 	this.moveTo(x, y);
 	this.lineTo(x + sx, y + sy);
@@ -68,18 +68,20 @@ class Table {
 		this.rows = Array(rows).fill(rowsize);
 		this.cells = Array.from({length: this.cols.length}, () => new Array(this.rows.length));
 		
+		this.xoff = 30;
+		this.yoff = 30;
+		
 		for (let i = 0; i < this.cols.length; i++)
 			for (let j = 0; j < this.rows.length; j++)
 				this.cells[i][j] = new Cell(this, i, j);
-		
-		this.prevClick = false;
-		this.selectionStart = null;
 	}
 	
+	// Run function on each cell
 	forEachCell(fun) {
 		this.cells.forEach((row, c) => row.forEach((cell, r) => fun(cell, c, r)));
 	}
 	
+	// Run function on each cell from some cell to some cell (coordinates or Cell objects)
 	forEachCellIn(c1, r1, c2, r2, fun) {
 		if (r2 != null && fun != null) // Treat as coordinates
 			for (let i = Math.min(c1, c2); i <= Math.max(c1, c2); i++)
@@ -89,6 +91,7 @@ class Table {
 			this.forEachCellIn(c1.col, c1.row, r1.col, r1.row, c2);
 	}
 	
+	// Replace refs
 	parseRefs(str, cell) {
 		// Replace refs of form A1:B5
 		str = str.replace(/\$?([a-z]+)\$?([0-9]+):\$?([a-z]+)\$?([0-9]+)/gi, (match, c1, r1, c2, r2) => {
@@ -122,10 +125,15 @@ class Table {
 		ctx.textBaseline = "middle";
 		
 		let selected = [];
+		let expr = "";
 		
 		this.forEachCell((cell) => {
 			if (cell.selected) {
 				ctx.fillStyle = "#ddf";
+				if (expr === "")
+					expr = cell.expr;
+				else
+					expr = "Multiple cells selected";
 				selected.push(cell);
 			} else
 				ctx.fillStyle = "#fff";
@@ -139,6 +147,8 @@ class Table {
 			ctx.fillStyle = "#333";
 			ctx.fillText(cell.value, cell.pos.x + 5, cell.pos.y + cell.size.y / 2);
 		});
+		
+		ctx.fillText(expr, 10, 10);
 		
 		ctx.strokeStyle = "#888";
 		ctx.lineWidth = 4;
@@ -162,7 +172,7 @@ class Table {
 		let x = 0;
 		for (let i = 0; i < c; i++)
 			x += this.cols[i];
-		return x;
+		return x + this.xoff;
 	}
 	
 	// Get y coordinate of cell
@@ -170,13 +180,13 @@ class Table {
 		let y = 0;
 		for (let i = 0; i < r; i++)
 			y += this.rows[i];
-		return y;
+		return y + this.yoff;
 	}
 	
 	// Get cell from coordinates
 	cellAt(x, y) {
 		let c = 0, r = 0;
-		let cs = 0, rs = 0;
+		let cs = this.xoff, rs = this.yoff;
 		while (cs < x && c < this.cols.length) {
 			cs += this.cols[c];
 			c++;
@@ -185,29 +195,33 @@ class Table {
 			rs += this.rows[r];
 			r++;
 		}
-		return this.cells[c - 1][r - 1];
+		return this.cells[(c < 1 ? 0 : c - 1)][(r < 1 ? 0 : r - 1)];
 	}
 	
 	update(mouse, key) {
+		// Clear selection when escape is clicked
 		if (key["Escape"]) {
 			this.selectionStart = null;
 			this.forEachCell(cell => cell.selected = cell.selected2 = false);
 		}
 		
+		// Start selection on hovered cell on click
 		if (mouse.click === 1 && !this.prevClick) {
 			this.selectionStart = this.cellAt(mouse.x, mouse.y);
 			
+			this.selection2 = key["Control"];
 			this.prevClick = true;
 		}
+		// Select cells while clicking
 		if (mouse.click === 1 && this.prevClick) {
 			if (this.selectionStart != null) {
-				let prop = (key["Control"] ? "selected2" : "selected");
+				let prop = (this.selection2 ? "selected2" : "selected");
 				this.forEachCell(cell => cell[prop] = false);
 				this.forEachCellIn(this.selectionStart, this.cellAt(mouse.x, mouse.y), (cell) => cell[prop] = true);
 			}
 		}
 		if (mouse.click === 0 && this.prevClick) {
-			if (key["Control"] && this.selectionStart != null)
+			if (this.selection2 && this.selectionStart != null)
 				this.forEachCellIn(this.selectionStart, this.cellAt(mouse.x, mouse.y), (cell) => {
 					cell.selected = !cell.selected;
 					cell.selected2 = false;
@@ -218,7 +232,7 @@ class Table {
 	}
 }
 
-Table.asCol = function (str) {
+Table.asCol = function(str) {
 	str = str.toUpperCase();
 	let val = 0;
 	for (let char of str)
