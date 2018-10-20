@@ -8,7 +8,7 @@ function EvalException(str) {
 }
 
 // Find matching parenthesis in a string
-String.prototype.matchPar = function (ind) {
+String.prototype.matchPar = function(ind) {
 	let pars = "(){}[]";
 	let matches = ["()", "{}", "[]"];
 	let chars = [];
@@ -26,16 +26,16 @@ String.prototype.matchPar = function (ind) {
 	}
 };
 
-String.prototype.isNum = function () {
-	return this.match(/([0-9]+)|([0-9]*\.[0-9]*)/);
+String.prototype.isNum = function() {
+	return this.match(/-?([0-9]+|[0-9]*\.[0-9]*)/);
 };
 
-String.prototype.isAlpha = function () {
+String.prototype.isAlpha = function() {
 	return this.match(/[a-z]+/i);
 };
 
 // Test in two arrays have one common element
-Array.prototype.hasCommonElem = function (arr) {
+Array.prototype.hasCommonElem = function(arr) {
 	for (let elem of arr)
 		if (this.includes(elem))
 			return true;
@@ -43,7 +43,7 @@ Array.prototype.hasCommonElem = function (arr) {
 };
 
 // Get the index of the biggest element in an array
-Array.prototype.minIndex = function () {
+Array.prototype.minIndex = function() {
 	let maxI = -1;
 	
 	for (let i = 0; i < this.length; i++)
@@ -54,14 +54,14 @@ Array.prototype.minIndex = function () {
 };
 
 // Get ith element of all subarrays in an array
-Array.prototype.getEach = function (i) {
+Array.prototype.getEach = function(i) {
 	let arr = [];
 	this.forEach(subArr => arr.push(subArr[i]));
 	return arr;
 };
 
 // Execute one or multiple binary operations (from left to right)
-Array.prototype.binOpe = function (ope, fun) {
+Array.prototype.binOpe = function(ope, fun) {
 	if (!Array.isArray(ope))
 		while (this.includes(ope)) {
 			let i = this.indexOf(ope);

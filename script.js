@@ -33,14 +33,14 @@ window.addEventListener("load", () => {
 
 // MOUSE EVENTS
 
-window.addEventListener("mousemove", (evt) => {
+window.addEventListener("mousemove", evt => {
 	mouse.x = (evt.clientX < 1 ? 1 : evt.clientX);
 	mouse.y = (evt.clientY < 1 ? 1 : evt.clientY);
 });
-window.addEventListener("mousedown", (evt) => mouse.click = evt.button + 1);
+window.addEventListener("mousedown", evt => mouse.click = evt.button + 1);
 window.addEventListener("mouseup", () => mouse.click = 0);
 
 // KEYBOARD EVENTS
 
-window.addEventListener("keydown", (evt) => key[evt.key] = true);
-window.addEventListener("keyup", (evt) => delete key[evt.key]);
+window.addEventListener("keydown", evt => key[evt.key] = true);
+window.addEventListener("keyup", evt => delete key[evt.key]);

@@ -96,7 +96,7 @@ class Table {
 		// Replace refs of form A1:B5
 		str = str.replace(/\$?([a-z]+)\$?([0-9]+):\$?([a-z]+)\$?([0-9]+)/gi, (match, c1, r1, c2, r2) => {
 			let tmp = "";
-			this.forEachCellIn(Table.asCol(c1), r1 - 1, Table.asCol(c2), r2 - 1, (cell2) => {
+			this.forEachCellIn(Table.asCol(c1), r1 - 1, Table.asCol(c2), r2 - 1, cell2 => {
 				tmp += cell2.name + ",";
 			});
 			return tmp.substring(0, tmp.length - 1);
@@ -127,7 +127,7 @@ class Table {
 		let selected = [];
 		let expr = "";
 		
-		this.forEachCell((cell) => {
+		this.forEachCell(cell => {
 			if (cell.selected) {
 				ctx.fillStyle = "#ddf";
 				if (expr === "")
@@ -217,12 +217,12 @@ class Table {
 			if (this.selectionStart != null) {
 				let prop = (this.selection2 ? "selected2" : "selected");
 				this.forEachCell(cell => cell[prop] = false);
-				this.forEachCellIn(this.selectionStart, this.cellAt(mouse.x, mouse.y), (cell) => cell[prop] = true);
+				this.forEachCellIn(this.selectionStart, this.cellAt(mouse.x, mouse.y), cell => cell[prop] = true);
 			}
 		}
 		if (mouse.click === 0 && this.prevClick) {
 			if (this.selection2 && this.selectionStart != null)
-				this.forEachCellIn(this.selectionStart, this.cellAt(mouse.x, mouse.y), (cell) => {
+				this.forEachCellIn(this.selectionStart, this.cellAt(mouse.x, mouse.y), cell => {
 					cell.selected = !cell.selected;
 					cell.selected2 = false;
 				});
